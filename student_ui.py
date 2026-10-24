@@ -3,6 +3,7 @@
 Person 1: Student Experience & QR integration.
 Exports `render_student_portal()` (and alias `render_student_ui`) for Person 3's app.py.
 Resilient fallback provided when backend modules are not yet loaded.
+Finalized with GreenPoints ledger, responsive styling, and QR demo triggers.
 """
 
 import datetime
