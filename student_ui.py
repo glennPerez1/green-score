@@ -477,18 +477,21 @@ def render_student_portal() -> None:
                 if not cleaned_desc:
                     st.error("⚠️ Validation Error: Description cannot be empty. Please provide specific details.")
                 else:
-                    new_rep_id = create_report(
-                        user_id=active_user_id,
-                        bin_id=selected_bin_id,
-                        issue_type=selected_issue_type,
-                        description=cleaned_desc,
-                    )
-                    st.balloons()
-                    st.success(
-                        f"🎉 **Report Submitted Successfully!** Reference ID: `{new_rep_id}`\n\n"
-                        f"Reported issue: **{selected_issue_type}** for bin **{selected_bin_id}**."
-                    )
-                    st.info("Your report is now **Submitted**. Check the **My Reports** tab to monitor its lifecycle.")
+                    try:
+                        new_rep_id = create_report(
+                            user_id=active_user_id,
+                            bin_id=selected_bin_id,
+                            issue_type=selected_issue_type,
+                            description=cleaned_desc,
+                        )
+                        st.balloons()
+                        st.success(
+                            f"🎉 **Report Submitted Successfully!** Reference ID: `{new_rep_id}`\n\n"
+                            f"Reported issue: **{selected_issue_type}** for bin **{selected_bin_id}**."
+                        )
+                        st.info("Your report is now **Submitted**. Check the **My Reports** tab to monitor its lifecycle.")
+                    except Exception as err:
+                        st.error(f"⚠️ Report Submission Failed: {err}")
 
     # ==========================================================================
     # TAB 2: MY REPORTS
