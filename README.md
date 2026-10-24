@@ -17,17 +17,53 @@ Campus administrators oversee incoming issues, transition reports through an aud
 
 ---
 
+## 🔑 Hackathon Demo Credentials
+
+For live evaluation, testing, and judge demonstrations:
+
+### 🛡️ Administrator Portal
+*Access via the **`🛡️ Admin Access`** tab:*
+- **Admin PIN:** `admin123` *(displayed on-screen for evaluator convenience)*
+- **User ID:** `ADM-001`
+- **Email:** `admin@greenscore.edu`
+- **Capabilities:** Review queue, report verification (+5 pts), issue resolution (+5 pts), rejection, audit logs, hotspot analytics, and bin QR management.
+
+### 🎓 Pre-Configured Student Profiles
+*Access via the **`🎓 Student Login`** tab (log in using Student ID or Email + PIN `1234`):*
+
+| Student Name | Student ID | Email | PIN | Department | Hostel (Bhawan) | Initial Badge |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Gagandeep Singh** | `STU-001` | `gagan@gmail.com` | **`1234`** | Mechanical Engineering | Vigyan Bhawan | Eco Champion 🌟 |
+| **Ronak Das** | `STU-002` | `ronak@gmail.com` | **`1234`** | Mechanical Engineering | Vigyan Bhawan | Active Scout 🌿 |
+| **Sameer Raj** | `STU-003` | `sameer@gmail.com` | **`1234`** | Mechanical Engineering | Jawahar Bhawan | Green Contributor 🌱 |
+
+### ✨ Self-Registration for New Students
+*Access via the **`✨ New Student Sign Up`** tab:*
+- Register with any **Full Name**, **Student ID**, and **Email Address** (**unrestricted email domains** — not limited to `@iitr.ac.in`).
+- Set a personal 4-digit security PIN.
+- Instant automatic authentication into their personalized reporting dashboard.
+
+---
+
 ## 🚀 Key User Journeys
 
-### 1. 🎓 Students (`student_ui.py`)
+### 1. 🔐 Role-Based Authentication Gateway (`app.py`)
+- **Gated Admin Access:** Protected by the Admin Security PIN (`admin123`). Unauthorized students cannot access or manipulate the review queue.
+- **Student Authentication:** Secure PIN verification for existing and newly registered accounts.
+- **Unrestricted Email Domain:** Any valid email domain can be used to create accounts.
+- **Session Isolation & Sign Out:** Dedicated user profile card and one-click session sign out in the sidebar.
+
+### 2. 🎓 Students (`student_ui.py`)
 - **QR Code Scanning & Preselection:** Mobile camera scan or simulation link (`/?bin_id=BIN-001`) automatically routes to the student reporting portal with the target bin pre-selected.
 - **Issue Submission:** Pick from standardized categories (*Overflowing bin*, *Incorrect segregation*, *Damaged bin*, *Missed collection*, *Other waste issue*), provide context, and submit.
+- **Duplicate Report Guard:** Prevents duplicate reports for the same bin and same issue type until the active report is resolved.
+- **Optional Photo Proof:** Attach real-time photographs or simulated camera uploads as visual evidence.
 - **My Reports History:** Track report progress through visual lifecycle bars (`Submitted` → `Under Review` → `Verified` → `Resolved`).
-- **GreenPoints Wallet & Ledger:** View current points balance and inspect a detailed transaction ledger for all earned rewards.
+- **GreenPoints Wallet & Ledger:** View live points balance and inspect a detailed transaction ledger for all earned rewards.
 
-### 2. 🛡️ Campus Administrators (`dashboard.py` & `analytics.py`)
+### 3. 🛡️ Campus Administrators (`dashboard.py` & `analytics.py`)
 - **Operations Dashboard:** Live KPI metrics for Total Reports, Submitted, Under Review, Verified, Resolved, and Total GreenPoints Awarded.
-- **Report Review Queue:** Filter reports by status, category, or bin. Inspect descriptions and timestamps.
+- **Report Review Queue:** Filter reports by status, category, or bin. Inspect descriptions, uploaded photo proof, and timestamps.
 - **Status Transition Workflow:** Move reports through strictly enforced states:
   - `Submitted` ➔ `Under Review`
   - `Under Review` ➔ `Verified` (+5 pts awarded) OR `Rejected` (0 pts)
@@ -36,7 +72,7 @@ Campus administrators oversee incoming issues, transition reports through an aud
 - **Interactive Visual Analytics:** Rich Plotly charts for status distributions, category frequency, campus hotspot bins, and daily submission timelines.
 - **Bins Directory & QR Tag Generator:** Inspect all registered bins and generate high-resolution QR tags.
 
-### 3. 🌱 GreenPoints Reward Policy (`points.py`)
+### 4. 🌱 GreenPoints Reward Policy (`points.py`)
 - **+5 GreenPoints** when an administrator verifies a report on-site.
 - **+5 GreenPoints** when the waste issue is completely resolved.
 - **0 Points** for pending, unverified, or rejected reports.
@@ -114,7 +150,7 @@ Expected output:
 Starting GreenScore Backend Tests...
 ============================================================
 [Test 1] Initializing database and running seed_data()...
-PASS: Database initialized and seeded with 3 users and 6 bins.
+PASS: Database initialized and seeded with 4 users and 6 bins.
 ...
 ALL BACKEND TESTS PASSED SUCCESSFULLY! (13/13)
 ============================================================
