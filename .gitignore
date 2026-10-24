@@ -1,1 +1,26 @@
-.venv
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+.env.*
+
+# Streamlit
+.streamlit/
+
+# OS generated
+.DS_Store
+Thumbs.db
