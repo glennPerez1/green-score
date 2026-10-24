@@ -461,16 +461,19 @@ def render_dashboard() -> None:
             )
             inspect_bin_id = selected_bin_for_qr.split(" — ")[0].strip()
 
+            lan_ip = qr_utils.get_local_ip()
+            default_host = os.getenv("APP_BASE_URL", f"http://{lan_ip}:8501")
+
             q_col1, q_col2 = st.columns([1, 2])
             with q_col1:
-                qr_img = qr_utils.generate_bin_qr(inspect_bin_id)
+                qr_img = qr_utils.generate_bin_qr(inspect_bin_id, base_url=default_host)
                 st.image(qr_img, caption=f"QR for {inspect_bin_id}", width=200)
             with q_col2:
-                target_url = qr_utils.get_bin_direct_url(inspect_bin_id)
+                target_url = qr_utils.get_bin_direct_url(inspect_bin_id, base_url=default_host)
                 st.markdown(f"**Target Routing URL:** `{target_url}`")
                 st.markdown(
-                    "Each QR code routes mobile cameras directly to GreenScore with the bin pre-selected. "
-                    "When deployed to Render, configure `APP_BASE_URL` to the live service domain."
+                    "📱 **Scannable from Phone:** As long as your phone is connected to the same Wi-Fi, "
+                    "scanning this QR with your camera will directly open GreenScore and preselect the bin."
                 )
 
             st.markdown("---")

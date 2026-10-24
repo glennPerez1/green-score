@@ -718,8 +718,34 @@ def render_student_portal() -> None:
             "Scan any QR code below using your mobile camera, or click **Simulate Scan** to test real-time URL detection!"
         )
 
-        app_base_url = os.getenv("APP_BASE_URL", "http://localhost:8501")
-        st.caption(f"Base routing target: `{app_base_url}/?bin_id=<BIN_ID>`")
+        local_ip = qr_utils.get_local_ip()
+        lan_url = f"http://{local_ip}:8501"
+
+        qr_mode = st.radio(
+            "📶 Target Network Host for QR Codes:",
+            [
+                f"📱 Phone Camera Scanning over Wi-Fi ({lan_url})",
+                "💻 Browser Simulation (http://localhost:8501)",
+                "🌐 Custom Public / Cloud Domain",
+            ],
+            index=0,
+            horizontal=True,
+            help="Select 'Phone Camera Scanning over Wi-Fi' to scan with your physical phone camera while connected to the same Wi-Fi.",
+        )
+
+        if qr_mode.startswith("📱"):
+            app_base_url = lan_url
+            st.success(
+                f"📶 **Live Phone Scanning Enabled!** Make sure your phone is connected to the same Wi-Fi network. "
+                f"Scanning with your phone camera will open `{lan_url}/?bin_id=<BIN_ID>`."
+            )
+        elif qr_mode.startswith("🌐"):
+            app_base_url = st.text_input("Enter Live Public URL", value=os.getenv("APP_BASE_URL", "https://greenscore.onrender.com"))
+        else:
+            app_base_url = "http://localhost:8501"
+            st.info("💻 **Localhost Simulation Active:** Ideal for clicking 'Simulate Scan' directly on this machine.")
+
+        st.caption(f"Encoded Target URL format: `{app_base_url}/?bin_id=<BIN_ID>`")
 
         # 3-column responsive grid
         cols = st.columns(3)

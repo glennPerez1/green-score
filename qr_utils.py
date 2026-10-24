@@ -10,6 +10,19 @@ from PIL import Image
 import qrcode
 
 
+def get_local_ip() -> str:
+    """Return the local machine's LAN IP so phones on the same Wi-Fi can scan and open GreenScore."""
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "10.61.25.235"
+
+
 def get_bin_direct_url(bin_id: str, base_url: Optional[str] = None) -> str:
     """Return the direct navigation target URL for a specific bin QR code.
 
