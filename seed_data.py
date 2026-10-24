@@ -11,9 +11,10 @@ def seed_data():
     init_db()
 
     users = [
-        ("STU-001", "Demo Student", "student"),
-        ("STU-002", "Demo Student 2", "student"),
-        ("ADM-001", "Demo Administrator", "admin"),
+        ("ADM-001", "Campus Administrator", "admin", "admin@greenscore.edu", "admin123"),
+        ("STU-001", "Gagandeep Singh", "student", "gagan@gmail.com", "1234"),
+        ("STU-002", "Ronak Das", "student", "ronak@gmail.com", "1234"),
+        ("STU-003", "Sameer Raj", "student", "sameer@gmail.com", "1234"),
     ]
 
     bins = [
@@ -45,10 +46,16 @@ def seed_data():
     ]
 
     with get_db() as conn:
-        conn.executemany("""
-            INSERT OR IGNORE INTO users (id, name, role)
-            VALUES (?, ?, ?)
-        """, users)
+        for u in users:
+            conn.execute("""
+                INSERT INTO users (id, name, role, email, pin)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    name = excluded.name,
+                    role = excluded.role,
+                    email = excluded.email,
+                    pin = excluded.pin
+            """, u)
 
         conn.executemany("""
             INSERT OR IGNORE INTO bins (id, location, waste_category)

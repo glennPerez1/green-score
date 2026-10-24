@@ -216,19 +216,19 @@ except ImportError:
 # ==============================================================================
 DEMO_STUDENTS = {
     "STU-001": {
-        "name": "Aarav Sharma",
+        "name": "Gagandeep Singh",
         "department": "Computer Science & Engineering",
         "hall": "Ganga Bhawan",
         "badge": "Eco Champion 🌟",
     },
     "STU-002": {
-        "name": "Priya Patel",
-        "department": "Environmental Engineering",
+        "name": "Ronak Das",
+        "department": "Civil & Environmental Engineering",
         "hall": "Sarojini Bhawan",
         "badge": "Active Scout 🌿",
     },
     "STU-003": {
-        "name": "Rohan Verma",
+        "name": "Sameer Raj",
         "department": "Mechanical Engineering",
         "hall": "Govind Bhawan",
         "badge": "Green Contributor 🌱",
@@ -303,27 +303,47 @@ def _inject_student_theme():
 # ==============================================================================
 # MAIN EXPORT FUNCTION: render_student_portal
 # ==============================================================================
-def render_student_portal() -> None:
+def render_student_portal(current_user: Optional[Dict[str, Any]] = None) -> None:
     """Render the complete student portal interface.
 
     Consumed by Person 3 in app.py or run standalone.
     """
     _inject_student_theme()
 
+    if not current_user:
+        current_user = st.session_state.get("authenticated_user")
+
     # --------------------------------------------------------------------------
-    # SIDEBAR: Student Account Switcher & Profile
+    # SIDEBAR: Student Profile
     # --------------------------------------------------------------------------
     with st.sidebar:
         st.markdown("### 🎓 Student Profile")
-        student_choices = [f"{uid}: {info['name']}" for uid, info in DEMO_STUDENTS.items()]
-        selected_student_str = st.selectbox(
-            "Active Student Account",
-            student_choices,
-            index=0,
-            help="Simulate switching between different campus student reporters.",
-        )
-        active_user_id = selected_student_str.split(":")[0].strip()
-        student_info = DEMO_STUDENTS[active_user_id]
+
+        if current_user and current_user.get("role") == "student":
+            active_user_id = current_user["id"]
+            user_name = current_user.get("name", "Student")
+            user_email = current_user.get("email", "")
+            student_info = dict(DEMO_STUDENTS.get(
+                active_user_id,
+                {
+                    "name": user_name,
+                    "department": "Registered Student",
+                    "hall": "Campus Resident",
+                    "badge": "Active Reporter 🌱",
+                },
+            ))
+            student_info["name"] = user_name
+        else:
+            student_choices = [f"{uid}: {info['name']}" for uid, info in DEMO_STUDENTS.items()]
+            selected_student_str = st.selectbox(
+                "Active Student Account",
+                student_choices,
+                index=0,
+                help="Switching accounts (Demo Mode).",
+            )
+            active_user_id = selected_student_str.split(":")[0].strip()
+            student_info = DEMO_STUDENTS[active_user_id]
+            user_email = ""
 
         # Live balance for sidebar
         user_balance = get_points_balance(active_user_id)
@@ -333,15 +353,16 @@ def render_student_portal() -> None:
             <div class="gs-card">
                 <div style="font-size:1.15rem; font-weight:700; color:#1b4332;">{student_info['name']}</div>
                 <div style="font-size:0.85rem; color:#555;">ID: <code>{active_user_id}</code></div>
-                <div style="font-size:0.82rem; color:#666; margin-top:4px;">🏛 {student_info['department']}</div>
-                <div style="font-size:0.82rem; color:#666;">🏠 {student_info['hall']}</div>
+                {f'<div style="font-size:0.82rem; color:#666;">✉️ {user_email}</div>' if user_email else ''}
+                <div style="font-size:0.82rem; color:#666; margin-top:4px;">🏛 {student_info.get('department', 'Student')}</div>
+                <div style="font-size:0.82rem; color:#666;">🏠 {student_info.get('hall', 'Campus Resident')}</div>
                 <hr style="margin: 8px 0; border: none; border-top: 1px solid #cce3de;" />
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:0.85rem; font-weight:600; color:#2d6a4f;">GreenPoints</span>
                     <span style="font-size:1.25rem; font-weight:800; color:#1b4332;">{user_balance} 🌱</span>
                 </div>
                 <div style="margin-top:6px; font-size:0.8rem; font-weight:600; color:#40916c;">
-                    {student_info['badge']}
+                    {student_info.get('badge', 'Active Scout 🌿')}
                 </div>
             </div>
             """,

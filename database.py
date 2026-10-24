@@ -31,6 +31,8 @@ def init_db(db_path=None):
                 name TEXT NOT NULL,
                 role TEXT NOT NULL
                     CHECK(role IN ('student', 'admin')),
+                email TEXT,
+                pin TEXT,
                 created_at TEXT NOT NULL DEFAULT (datetime('now'))
             );
 
@@ -78,6 +80,12 @@ def init_db(db_path=None):
                 changed_at TEXT NOT NULL DEFAULT (datetime('now'))
             );
         """)
+        # Safe migration for existing databases
+        for col_def in ["email TEXT", "pin TEXT"]:
+            try:
+                conn.execute(f"ALTER TABLE users ADD COLUMN {col_def}")
+            except Exception:
+                pass
 
 
 def get_bins(active_only=True):
@@ -154,6 +162,45 @@ def toggle_bin_status(bin_id, active):
             WHERE id = ?
         """, (1 if active else 0, bin_id))
     return True
+
+
+def get_user_by_id_or_email(identifier):
+    """Retrieve user record by ID or email."""
+    if not identifier:
+        return None
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT * FROM users WHERE LOWER(id) = LOWER(?) OR (email IS NOT NULL AND LOWER(email) = LOWER(?))",
+            (str(identifier).strip(), str(identifier).strip()),
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def create_user(user_id, name, role="student", email=None, pin="1234"):
+    """Register a new user in the database."""
+    with get_db() as conn:
+        conn.execute("""
+            INSERT INTO users (id, name, role, email, pin)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            str(user_id).strip(),
+            str(name).strip(),
+            str(role).strip(),
+            str(email).strip() if email else None,
+            str(pin).strip(),
+        ))
+    return get_user_by_id_or_email(user_id)
+
+
+def verify_user_credentials(identifier, pin):
+    """Verify user credentials by ID/Email and PIN."""
+    user = get_user_by_id_or_email(identifier)
+    if not user:
+        return None
+    stored_pin = user.get("pin") or "1234"
+    if str(stored_pin).strip() == str(pin).strip():
+        return user
+    return None
 
 
 if __name__ == "__main__":
