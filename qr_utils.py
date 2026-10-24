@@ -32,7 +32,7 @@ def get_bin_direct_url(bin_id: str, base_url: Optional[str] = None) -> str:
     if not base_url:
         base_url = os.getenv("APP_BASE_URL", "https://green-score-9orq.onrender.com")
 
-    clean_base = base_url.rstrip("/")
+    clean_base = str(base_url).rstrip("/")
     return f"{clean_base}/?bin_id={bin_id}"
 
 
