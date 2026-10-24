@@ -351,23 +351,23 @@ def render_dashboard() -> None:
         with row1_col1:
             st.markdown("#### 🍩 Report Status Distribution")
             fig_status = analytics.plot_status_breakdown(all_reports)
-            st.plotly_chart(fig_status, use_container_width=True)
+            st.plotly_chart(fig_status, use_container_width=True, key="chart_status_breakdown")
 
         with row1_col2:
             st.markdown("#### 📊 Waste Issues by Category")
             fig_issues = analytics.plot_issues_by_category(all_reports)
-            st.plotly_chart(fig_issues, use_container_width=True)
+            st.plotly_chart(fig_issues, use_container_width=True, key="chart_issues_category")
 
         row2_col1, row2_col2 = st.columns(2)
         with row2_col1:
             st.markdown("#### 📍 Top Campus Bin Activity Hotspots")
             fig_bins = analytics.plot_reports_by_bin(all_reports)
-            st.plotly_chart(fig_bins, use_container_width=True)
+            st.plotly_chart(fig_bins, use_container_width=True, key="chart_bins_activity")
 
         with row2_col2:
             st.markdown("#### 📅 Report Submissions Timeline")
             fig_timeline = analytics.plot_activity_timeline(all_reports)
-            st.plotly_chart(fig_timeline, use_container_width=True)
+            st.plotly_chart(fig_timeline, use_container_width=True, key="chart_activity_timeline")
 
     # ==========================================================================
     # TAB 3: GREENPOINTS LEDGER & IMPACT
@@ -400,7 +400,7 @@ def render_dashboard() -> None:
         with col_lp_right:
             st.markdown("#### 🎯 Points Allocation Breakdown")
             fig_pts = analytics.plot_points_distribution(ledger_records)
-            st.plotly_chart(fig_pts, use_container_width=True)
+            st.plotly_chart(fig_pts, use_container_width=True, key="chart_points_distribution")
 
         st.markdown("#### 📜 Transaction History Log")
         if not ledger_records:
