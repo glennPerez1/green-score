@@ -63,25 +63,23 @@ def create_report(user_id, bin_id, issue_type, description):
         if not bin_record["active"]:
             raise ReportError(f"Bin '{bin_id}' is currently inactive.")
 
-        # Check for duplicate reports for this bin & issue within the configured window
+        # Check for unresolved reports for this bin & issue type (locked until Resolved or Rejected)
         duplicate = conn.execute("""
-            SELECT id, created_at FROM reports
+            SELECT id, status, created_at FROM reports
             WHERE bin_id = ?
               AND issue_type = ?
-              AND status IN (?, ?)
-              AND created_at >= datetime('now', ?)
+              AND status NOT IN (?, ?)
         """, (
             bin_id,
             issue_type,
-            STATUS_SUBMITTED,
-            STATUS_UNDER_REVIEW,
-            f"-{DUPLICATE_WINDOW_MINUTES} minutes",
+            STATUS_RESOLVED,
+            STATUS_REJECTED,
         )).fetchone()
 
         if duplicate:
             raise ReportError(
-                f"A report for bin '{bin_id}' with issue '{issue_type}' was submitted recently "
-                f"({duplicate['id']}) and is currently pending review."
+                f"An active report for bin '{bin_id}' with issue '{issue_type}' already exists "
+                f"({duplicate['id']} - status: {duplicate['status']}). New submissions are locked until resolved."
             )
 
         report_id = f"REP-{uuid.uuid4().hex[:8].upper()}"

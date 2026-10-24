@@ -456,6 +456,25 @@ def render_student_portal() -> None:
                     help="Select the issue type matching the bin condition.",
                 )
 
+            # Live check for existing active report for same bin + same issue type
+            existing_all = get_reports()
+            active_duplicate = next(
+                (
+                    r for r in existing_all
+                    if r.get("bin_id") == selected_bin_id
+                    and r.get("issue_type") == selected_issue_type
+                    and r.get("status") not in (STATUS_RESOLVED, STATUS_REJECTED)
+                ),
+                None,
+            )
+
+            if active_duplicate:
+                st.warning(
+                    f"🔒 **Duplicate Guard Active**: Report `#{active_duplicate.get('id')}` for **{selected_issue_type}** "
+                    f"at `{selected_bin_id}` is already in progress (Status: **{active_duplicate.get('status')}**).\n\n"
+                    f"To prevent duplicate reports, submissions for this issue are locked until the issue is marked as **Resolved**."
+                )
+
             # Details & description
             st.markdown(
                 f"**Target Bin Details:** `{selected_bin_obj['id']}` located at "
@@ -469,10 +488,23 @@ def render_student_portal() -> None:
                 height=120,
             )
 
+            # Optional photo proof uploader
+            col_photo, col_preview = st.columns([1, 1])
+            with col_photo:
+                uploaded_photo = st.file_uploader(
+                    "📷 Attach Photo Proof (Optional)",
+                    type=["png", "jpg", "jpeg"],
+                    help="Upload a photo of the bin issue to help maintenance verify and resolve faster.",
+                )
+            with col_preview:
+                if uploaded_photo:
+                    st.image(uploaded_photo, caption="📸 Attached Proof Preview", width=220)
+
             # Verification checkpoint info
             st.caption("🔒 Verified reports earn **+5 GreenPoints**; resolved reports earn an additional **+5 GreenPoints**.")
 
-            if st.button("🚀 Submit Waste Report", type="primary", use_container_width=True):
+            submit_disabled = active_duplicate is not None
+            if st.button("🚀 Submit Waste Report", type="primary", use_container_width=True, disabled=submit_disabled):
                 cleaned_desc = description_input.strip()
                 if not cleaned_desc:
                     st.error("⚠️ Validation Error: Description cannot be empty. Please provide specific details.")
@@ -484,6 +516,14 @@ def render_student_portal() -> None:
                             issue_type=selected_issue_type,
                             description=cleaned_desc,
                         )
+                        # Save photo proof if attached
+                        if uploaded_photo:
+                            os.makedirs("uploads", exist_ok=True)
+                            ext = os.path.splitext(uploaded_photo.name)[1].lower() or ".jpg"
+                            photo_path = os.path.join("uploads", f"{new_rep_id}{ext}")
+                            with open(photo_path, "wb") as f_out:
+                                f_out.write(uploaded_photo.getbuffer())
+
                         st.balloons()
                         st.success(
                             f"🎉 **Report Submitted Successfully!** Reference ID: `{new_rep_id}`\n\n"
@@ -553,6 +593,16 @@ def render_student_portal() -> None:
                     st.write(f"**Submitted Date:** {rep.get('created_at')}")
                     if rep.get("admin_note"):
                         st.info(f"**Admin Remarks:** {rep.get('admin_note')}")
+
+                    # Check for attached photo proof
+                    photo_found = None
+                    for ext_c in [".png", ".jpg", ".jpeg"]:
+                        cand = os.path.join("uploads", f"{rep.get('id')}{ext_c}")
+                        if os.path.exists(cand):
+                            photo_found = cand
+                            break
+                    if photo_found:
+                        st.image(photo_found, caption=f"📸 Attached Proof for #{rep.get('id')}", width=280)
                     
                     # Visual status progress bar
                     status_order = [STATUS_SUBMITTED, STATUS_UNDER_REVIEW, STATUS_VERIFIED, STATUS_RESOLVED]
@@ -571,28 +621,58 @@ def render_student_portal() -> None:
         balance = get_points_balance(active_user_id)
         ledger_entries = get_points_ledger(active_user_id)
 
+        # Tier calculation
+        if balance < 15:
+            tier_name = "Bronze Reporter"
+            tier_icon = "🥉"
+            next_tier = "Silver Scout (15 pts)"
+            pts_needed = 15 - balance
+            prog_ratio = max(0.0, min(1.0, balance / 15.0))
+        elif balance < 30:
+            tier_name = "Silver Scout"
+            tier_icon = "🥈"
+            next_tier = "Gold Champion (30 pts)"
+            pts_needed = 30 - balance
+            prog_ratio = max(0.0, min(1.0, (balance - 15) / 15.0))
+        elif balance < 50:
+            tier_name = "Gold Champion"
+            tier_icon = "🥇"
+            next_tier = "Platinum Eco Hero (50 pts)"
+            pts_needed = 50 - balance
+            prog_ratio = max(0.0, min(1.0, (balance - 30) / 20.0))
+        else:
+            tier_name = "Platinum Eco Hero"
+            tier_icon = "👑"
+            next_tier = "Maximum Tier Achieved!"
+            pts_needed = 0
+            prog_ratio = 1.0
+
         col_wallet, col_rules = st.columns([1, 1])
 
         with col_wallet:
             st.markdown(
                 f"""
-                <div class="gs-card" style="text-align:center; padding: 28px 20px;">
-                    <div style="font-size:0.95rem; text-transform:uppercase; letter-spacing:1px; color:#2d6a4f; font-weight:700;">
+                <div class="gs-card" style="text-align:center; padding: 24px 20px;">
+                    <div style="font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; color:#2d6a4f; font-weight:700;">
                         Current Available Balance
                     </div>
-                    <div style="font-size:3.2rem; font-weight:800; color:#1b4332; margin:10px 0;">
+                    <div style="font-size:3.2rem; font-weight:800; color:#1b4332; margin:8px 0;">
                         {balance} <span style="font-size:2rem;">🌱</span>
                     </div>
-                    <div style="font-size:0.9rem; color:#40916c; font-weight:600;">
-                        {student_info['badge']}
+                    <div style="font-size:1rem; color:#2d6a4f; font-weight:700;">
+                        {tier_icon} {tier_name}
                     </div>
-                    <div style="font-size:0.8rem; color:#777; margin-top:8px;">
-                        Redeemable for campus cafeteria discounts, eco-station tokens, and library credits.
+                    <div style="font-size:0.8rem; color:#666; margin-top:6px;">
+                        Redeemable for cafeteria discounts, campus printing credits, and eco-merchandise.
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+            if pts_needed > 0:
+                st.progress(prog_ratio, text=f"Tier Progress: {pts_needed} 🌱 more to reach {next_tier}")
+            else:
+                st.progress(1.0, text=f"👑 {next_tier}")
 
         with col_rules:
             st.markdown(

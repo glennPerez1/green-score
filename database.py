@@ -135,6 +135,27 @@ def get_dashboard_stats():
     }
 
 
+def add_bin(bin_id, location, waste_category):
+    """Register a new campus waste bin."""
+    with get_db() as conn:
+        conn.execute("""
+            INSERT INTO bins (id, location, waste_category, active)
+            VALUES (?, ?, ?, 1)
+        """, (bin_id.strip(), location.strip(), waste_category.strip()))
+    return True
+
+
+def toggle_bin_status(bin_id, active):
+    """Activate or deactivate an existing campus waste bin."""
+    with get_db() as conn:
+        conn.execute("""
+            UPDATE bins
+            SET active = ?
+            WHERE id = ?
+        """, (1 if active else 0, bin_id))
+    return True
+
+
 if __name__ == "__main__":
     init_db()
     print("GreenScore database initialized successfully.")

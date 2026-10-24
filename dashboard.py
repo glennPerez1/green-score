@@ -9,7 +9,9 @@ from typing import Dict, Any, List, Optional
 import pandas as pd
 import streamlit as st
 
-from database import get_db, get_reports, get_bins, get_dashboard_stats
+import datetime
+import os
+from database import get_db, get_reports, get_bins, get_dashboard_stats, add_bin, toggle_bin_status
 from report_service import transition_report, get_report_by_id, get_report_history, ReportError
 from points import get_points_balance
 from constants import (
@@ -214,6 +216,15 @@ def render_dashboard() -> None:
             df_table = pd.DataFrame(table_rows)
             st.dataframe(df_table, use_container_width=True, hide_index=True)
 
+            csv_bytes = df_table.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label=f"📥 Download Filtered Reports ({len(df_table)} rows) as CSV",
+                data=csv_bytes,
+                file_name=f"greenscore_reports_{datetime.date.today().isoformat()}.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+
         st.markdown("---")
 
         # Report Action & Review Center
@@ -258,6 +269,16 @@ def render_dashboard() -> None:
                         """,
                         unsafe_allow_html=True,
                     )
+
+                    # Check for attached photo proof
+                    photo_proof = None
+                    for ext_c in [".png", ".jpg", ".jpeg"]:
+                        cand_p = os.path.join("uploads", f"{rep_details['id']}{ext_c}")
+                        if os.path.exists(cand_p):
+                            photo_proof = cand_p
+                            break
+                    if photo_proof:
+                        st.image(photo_proof, caption=f"📸 Attached Photo Proof for #{rep_details['id']}", width=260)
 
                 with col_det2:
                     st.markdown(
@@ -451,6 +472,38 @@ def render_dashboard() -> None:
                     "Each QR code routes mobile cameras directly to GreenScore with the bin pre-selected. "
                     "When deployed to Render, configure `APP_BASE_URL` to the live service domain."
                 )
+
+            st.markdown("---")
+            col_add, col_toggle = st.columns([1, 1])
+
+            with col_add:
+                st.markdown("#### ➕ Add New Campus Bin")
+                new_bid = st.text_input("New Bin ID", placeholder="e.g. BIN-007")
+                new_loc = st.text_input("Campus Location", placeholder="e.g. Main Auditorium Lawn")
+                new_cat = st.selectbox("Waste Category", ["General", "Recyclable", "Organic", "E-Waste / Hazardous"])
+                if st.button("➕ Register Bin", type="primary", use_container_width=True):
+                    if not new_bid.strip() or not new_loc.strip():
+                        st.error("Please provide both Bin ID and Location.")
+                    elif any(b["id"].upper() == new_bid.strip().upper() for b in bins):
+                        st.error(f"Bin ID '{new_bid.strip()}' already exists.")
+                    else:
+                        try:
+                            add_bin(new_bid.strip(), new_loc.strip(), new_cat)
+                            st.success(f"Bin {new_bid.strip()} successfully registered!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error registering bin: {e}")
+
+            with col_toggle:
+                st.markdown("#### ⚙️ Activate / Deactivate Bins")
+                for b in bins:
+                    is_active = bool(b.get("active", 1))
+                    icon = "🟢 Active" if is_active else "🔴 Inactive"
+                    btn_text = "Deactivate" if is_active else "Activate"
+                    st.write(f"**{b['id']}** — {b['location']} ({icon})")
+                    if st.button(f"{btn_text} {b['id']}", key=f"t_{b['id']}"):
+                        toggle_bin_status(b["id"], not is_active)
+                        st.rerun()
 
 
 if __name__ == "__main__":

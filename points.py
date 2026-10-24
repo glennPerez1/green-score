@@ -48,3 +48,10 @@ def get_points_ledger(user_id):
             ORDER BY created_at DESC, id DESC
         """, (user_id,)).fetchall()
         return [dict(row) for row in rows]
+
+
+def get_total_points_awarded():
+    """Calculate total GreenPoints awarded across all students campus-wide."""
+    with get_db() as conn:
+        row = conn.execute("SELECT COALESCE(SUM(points), 0) AS total FROM points_ledger").fetchone()
+        return int(row["total"]) if row else 0
