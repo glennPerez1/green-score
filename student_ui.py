@@ -720,27 +720,34 @@ def render_student_portal() -> None:
 
         local_ip = qr_utils.get_local_ip()
         lan_url = f"http://{local_ip}:8501"
+        render_url = os.getenv("APP_BASE_URL", "https://green-score-9orq.onrender.com")
 
         qr_mode = st.radio(
             "📶 Target Network Host for QR Codes:",
             [
+                f"🚀 Live Render Cloud Deployment ({render_url})",
                 f"📱 Phone Camera Scanning over Wi-Fi ({lan_url})",
                 "💻 Browser Simulation (http://localhost:8501)",
                 "🌐 Custom Public / Cloud Domain",
             ],
             index=0,
             horizontal=True,
-            help="Select 'Phone Camera Scanning over Wi-Fi' to scan with your physical phone camera while connected to the same Wi-Fi.",
+            help="Select the host URL you want the QR code to point to when scanned.",
         )
 
-        if qr_mode.startswith("📱"):
+        if qr_mode.startswith("🚀"):
+            app_base_url = render_url
+            st.success(
+                f"🚀 **Live Render Cloud Enabled!** Scanning with your phone camera will open `{render_url}/?bin_id=<BIN_ID>`."
+            )
+        elif qr_mode.startswith("📱"):
             app_base_url = lan_url
             st.success(
                 f"📶 **Live Phone Scanning Enabled!** Make sure your phone is connected to the same Wi-Fi network. "
                 f"Scanning with your phone camera will open `{lan_url}/?bin_id=<BIN_ID>`."
             )
         elif qr_mode.startswith("🌐"):
-            app_base_url = st.text_input("Enter Live Public URL", value=os.getenv("APP_BASE_URL", "https://greenscore.onrender.com"))
+            app_base_url = st.text_input("Enter Live Public URL", value=render_url)
         else:
             app_base_url = "http://localhost:8501"
             st.info("💻 **Localhost Simulation Active:** Ideal for clicking 'Simulate Scan' directly on this machine.")

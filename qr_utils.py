@@ -27,10 +27,10 @@ def get_bin_direct_url(bin_id: str, base_url: Optional[str] = None) -> str:
     """Return the direct navigation target URL for a specific bin QR code.
 
     Target URL format: {base_url}/?bin_id={bin_id}
-    Falls back to environment variable APP_BASE_URL or http://localhost:8501.
+    Falls back to environment variable APP_BASE_URL or https://green-score-9orq.onrender.com.
     """
     if not base_url:
-        base_url = os.getenv("APP_BASE_URL", "http://localhost:8501")
+        base_url = os.getenv("APP_BASE_URL", "https://green-score-9orq.onrender.com")
 
     clean_base = base_url.rstrip("/")
     return f"{clean_base}/?bin_id={bin_id}"
@@ -40,7 +40,7 @@ def generate_bin_qr(bin_id: str, base_url: Optional[str] = None) -> Image.Image:
     """Generate a stylized scannable QR code PIL Image for a given bin_id.
 
     - Target URL format: {base_url}/?bin_id={bin_id}
-    - Base URL fetched from os.getenv("APP_BASE_URL", "http://localhost:8501")
+    - Base URL fetched from os.getenv("APP_BASE_URL", "https://green-score-9orq.onrender.com")
     - Styled in dark green (#1b4332) fill over white background.
     - PIL image factory with RGB conversion.
     """

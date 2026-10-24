@@ -138,7 +138,7 @@ ALL BACKEND TESTS PASSED SUCCESSFULLY! (13/13)
    ```
 5. **Environment Variables:**
    - `PORT`: (Set automatically by Render)
-   - `APP_BASE_URL`: Live service URL (e.g., `https://greenscore.onrender.com`) used when generating QR codes.
+   - `APP_BASE_URL`: Live service URL (`https://green-score-9orq.onrender.com`) used when generating QR codes.
    - `DB_PATH`: Path to SQLite database (defaults to `greenscore.db`).
 
 ### ⚠️ Database Persistence on Render & Trade-Offs
@@ -154,7 +154,7 @@ ALL BACKEND TESTS PASSED SUCCESSFULLY! (13/13)
 ## 📱 QR Code Simulation
 
 To test QR code handling without a physical camera:
-1. Open the student portal or access `http://localhost:8501/?bin_id=BIN-002`.
+1. Open the student portal or access `https://green-score-9orq.onrender.com/?bin_id=BIN-002` (or `http://localhost:8501/?bin_id=BIN-002` locally).
 2. The application automatically switches into Student Reporting mode with **BIN-002 (Block A - First Floor)** pre-selected.
 3. Or visit the **Demo QR Bins** tab in the student portal and click **"Simulate Scan"** on any bin.
 
