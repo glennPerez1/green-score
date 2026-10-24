@@ -90,7 +90,7 @@ if not user:
 
         col_l1, col_l2 = st.columns([1, 1])
         with col_l1:
-            stu_identifier = st.text_input("Student ID or Email", placeholder="e.g. STU-001 or ronak@gmail.com")
+            stu_identifier = st.text_input("Student ID or Email", placeholder="e.g. STU-001, STU-002")
             stu_pin = st.text_input("4-Digit Security PIN", type="password", placeholder="Enter your PIN")
 
             if st.button("🔑 Log In as Student", type="primary", use_container_width=True):

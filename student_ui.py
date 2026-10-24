@@ -217,20 +217,20 @@ except ImportError:
 DEMO_STUDENTS = {
     "STU-001": {
         "name": "Gagandeep Singh",
-        "department": "Computer Science & Engineering",
-        "hall": "Ganga Bhawan",
+        "department": "Mechanical Engineering",
+        "hall": "Vigyan Bhawan",
         "badge": "Eco Champion 🌟",
     },
     "STU-002": {
         "name": "Ronak Das",
-        "department": "Civil & Environmental Engineering",
-        "hall": "Sarojini Bhawan",
+        "department": "Mechanical Engineering",
+        "hall": "Vigyan Bhawan",
         "badge": "Active Scout 🌿",
     },
     "STU-003": {
         "name": "Sameer Raj",
         "department": "Mechanical Engineering",
-        "hall": "Govind Bhawan",
+        "hall": "Jawahar Bhawan",
         "badge": "Green Contributor 🌱",
     },
 }
