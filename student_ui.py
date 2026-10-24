@@ -18,10 +18,12 @@ import qr_utils
 # BACKEND IMPORT WITH FAILSAFE MOCK FALLBACK (Shared Contract Person 2)
 # ==============================================================================
 try:
-    from database import get_bins
-    from report_service import create_report, get_reports
-    from points import get_points_balance, get_points_ledger
-    from constants import (
+    # Backend modules are authored by Person 2 and will resolve once Person 2 merges.
+    # type: ignore comments prevent IDE linters from showing red squiggles before Person 2 commits.
+    from database import get_bins  # type: ignore
+    from report_service import create_report, get_reports  # type: ignore
+    from points import get_points_balance, get_points_ledger  # type: ignore
+    from constants import (  # type: ignore
         ISSUE_TYPES,
         STATUS_SUBMITTED,
         STATUS_UNDER_REVIEW,
